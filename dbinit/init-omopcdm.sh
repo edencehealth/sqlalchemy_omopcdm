@@ -26,15 +26,6 @@ main() {
         set -x
         ;;
 
-      --mega-turtles)
-        usage "You can't handle MEGA-TURTLES."
-        ;;
-
-      --turtle)
-        shift || usage "--turtle requires an argument"
-        TURTLE="$1"
-        ;;
-
       --)
         shift || true
         break
@@ -59,10 +50,11 @@ main() {
   psql -c "CREATE SCHEMA IF NOT EXISTS ${CDM_SCHEMA};"
 
     #"/ddl/OMOPCDM_postgresql_5.4_indices.sql" \
-    #"/ddl/OMOPCDM_postgresql_5.4_constraints.sql" \
   for file in \
     "/ddl/OMOPCDM_postgresql_5.4_ddl.sql" \
     "/ddl/OMOPCDM_postgresql_5.4_primary_keys.sql" \
+    "/ddl/OMOPCDM_postgresql_5.4_constraints.sql" \
+    "/ddl/eh_mods.sql" \
   ; do
     tmp_file="${temp_dir}/$(basename "$file")"
     log "expanding sql vars of ${file} into ${tmp_file}"

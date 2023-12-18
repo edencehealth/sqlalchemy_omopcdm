@@ -35,8 +35,8 @@ services:
       CDM_SCHEMA: public
     volumes:
       - "targetdb:/pgdata:rw"
-      - "./ddl:/ddl:ro"
-      - "./init-omopcdm.sh:/docker-entrypoint-initdb.d/init-omopcdm.sh:ro"
+      - "./dbinit/ddl:/ddl:ro"
+      - "./dbinit/init-omopcdm.sh:/docker-entrypoint-initdb.d/init-omopcdm.sh:ro"
     healthcheck:
       interval: 10s
       retries: 10
