@@ -1,0 +1,3 @@
+basecfg~=2.1.1
+psycopg2-binary~=2.9.9
+git+https://github.com/agronholm/sqlacodegen@master

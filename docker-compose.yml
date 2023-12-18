@@ -1,0 +1,57 @@
+services:
+  # custom container for running this python package:
+  # https://github.com/agronholm/sqlacodegen
+  modelgen:
+    build: modelgen
+    environment:
+      DB_HOST: cdmdb
+      DB_USER: ${TARGET_DB_USER}
+      DB_PASSWORD: ${TARGET_DB_PASSWORD}
+      DB_NAME: ${TARGET_DB_NAME}
+      OUTPUT_FILE: "/output/model.py"
+      OPTIONS: "nobidi"
+      GENERATOR: "declarative"
+    depends_on:
+      cdmdb:
+        condition: service_healthy
+    restart: no
+    volumes:
+      - "./output:/output:rw"
+
+  # https://hub.docker.com/_/postgres
+  cdmdb:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: ${TARGET_DB_USER}
+      POSTGRES_PASSWORD: ${TARGET_DB_PASSWORD}
+      POSTGRES_DB: ${TARGET_DB_NAME}
+      PGDATA: "/pgdata"
+      # the following values are libpq envvars which make it easier to exec psql
+      # and the other tools
+      PGDATABASE: ${TARGET_DB_NAME}
+      PGUSER: ${TARGET_DB_USER}
+      PGPASSWORD: ${TARGET_DB_PASSWORD}
+      # this variable is consumed by init-omopcdm.sh
+      CDM_SCHEMA: public
+    volumes:
+      - "targetdb:/pgdata:rw"
+      - "./ddl:/ddl:ro"
+      - "./init-omopcdm.sh:/docker-entrypoint-initdb.d/init-omopcdm.sh:ro"
+    healthcheck:
+      interval: 10s
+      retries: 10
+      test:
+        - CMD
+        - /usr/local/bin/pg_isready
+      timeout: 3s
+    command:
+      - -c
+      - shared_buffers=256MB
+      - -c
+      - max_connections=200
+    restart: unless-stopped
+    shm_size: 2gb
+
+
+volumes:
+  targetdb:
