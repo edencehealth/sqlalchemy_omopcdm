@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import Column, Date, DateTime, ForeignKeyConstraint, Integer, Numeric, PrimaryKeyConstraint, String, Table, Text
+from sqlalchemy import Date, DateTime, ForeignKeyConstraint, Integer, Numeric, PrimaryKeyConstraint, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 import datetime
 import decimal
@@ -12,7 +12,7 @@ class Base(DeclarativeBase):
 class Cohort(Base):
     __tablename__ = 'cohort'
     __table_args__ = (
-        PrimaryKeyConstraint('cohort_definition_id', 'subject_id', 'cohort_start_date', 'cohort_end_date', name='eh_synth_pk'),
+        PrimaryKeyConstraint('cohort_definition_id', 'subject_id', 'cohort_start_date', 'cohort_end_date', name='eh_composite_pk_cohort'),
     )
 
     cohort_definition_id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -90,56 +90,79 @@ class Vocabulary(Base):
     vocabulary_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[vocabulary_concept_id])
 
 
-t_cdm_source = Table(
-    'cdm_source', Base.metadata,
-    Column('cdm_source_name', String(255), nullable=False),
-    Column('cdm_source_abbreviation', String(25), nullable=False),
-    Column('cdm_holder', String(255), nullable=False),
-    Column('source_description', Text),
-    Column('source_documentation_reference', String(255)),
-    Column('cdm_etl_reference', String(255)),
-    Column('source_release_date', Date, nullable=False),
-    Column('cdm_release_date', Date, nullable=False),
-    Column('cdm_version', String(10)),
-    Column('cdm_version_concept_id', Integer, nullable=False),
-    Column('vocabulary_version', String(20), nullable=False),
-    ForeignKeyConstraint(['cdm_version_concept_id'], ['concept.concept_id'], name='fpk_cdm_source_cdm_version_concept_id')
-)
+class CdmSource(Base):
+    __tablename__ = 'cdm_source'
+    __table_args__ = (
+        ForeignKeyConstraint(['cdm_version_concept_id'], ['concept.concept_id'], name='fpk_cdm_source_cdm_version_concept_id'),
+        PrimaryKeyConstraint('cdm_source_name', 'cdm_source_abbreviation', 'cdm_holder', 'source_description', 'source_documentation_reference', 'cdm_etl_reference', 'source_release_date', 'cdm_release_date', 'cdm_version', 'cdm_version_concept_id', 'vocabulary_version', name='eh_composite_pk_cdm_source')
+    )
+
+    cdm_source_name: Mapped[str] = mapped_column(String(255), primary_key=True)
+    cdm_source_abbreviation: Mapped[str] = mapped_column(String(25), primary_key=True)
+    cdm_holder: Mapped[str] = mapped_column(String(255), primary_key=True)
+    source_description: Mapped[str] = mapped_column(Text, primary_key=True)
+    source_documentation_reference: Mapped[str] = mapped_column(String(255), primary_key=True)
+    cdm_etl_reference: Mapped[str] = mapped_column(String(255), primary_key=True)
+    source_release_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+    cdm_release_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+    cdm_version: Mapped[str] = mapped_column(String(10), primary_key=True)
+    cdm_version_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    vocabulary_version: Mapped[str] = mapped_column(String(20), primary_key=True)
+
+    cdm_version_concept: Mapped['Concept'] = relationship('Concept')
 
 
-t_cohort_definition = Table(
-    'cohort_definition', Base.metadata,
-    Column('cohort_definition_id', Integer, nullable=False),
-    Column('cohort_definition_name', String(255), nullable=False),
-    Column('cohort_definition_description', Text),
-    Column('definition_type_concept_id', Integer, nullable=False),
-    Column('cohort_definition_syntax', Text),
-    Column('subject_concept_id', Integer, nullable=False),
-    Column('cohort_initiation_date', Date),
-    ForeignKeyConstraint(['definition_type_concept_id'], ['concept.concept_id'], name='fpk_cohort_definition_definition_type_concept_id'),
-    ForeignKeyConstraint(['subject_concept_id'], ['concept.concept_id'], name='fpk_cohort_definition_subject_concept_id')
-)
+class CohortDefinition(Base):
+    __tablename__ = 'cohort_definition'
+    __table_args__ = (
+        ForeignKeyConstraint(['definition_type_concept_id'], ['concept.concept_id'], name='fpk_cohort_definition_definition_type_concept_id'),
+        ForeignKeyConstraint(['subject_concept_id'], ['concept.concept_id'], name='fpk_cohort_definition_subject_concept_id'),
+        PrimaryKeyConstraint('cohort_definition_id', 'cohort_definition_name', 'cohort_definition_description', 'definition_type_concept_id', 'cohort_definition_syntax', 'subject_concept_id', 'cohort_initiation_date', name='eh_composite_pk_cohort_definition')
+    )
+
+    cohort_definition_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    cohort_definition_name: Mapped[str] = mapped_column(String(255), primary_key=True)
+    cohort_definition_description: Mapped[str] = mapped_column(Text, primary_key=True)
+    definition_type_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    cohort_definition_syntax: Mapped[str] = mapped_column(Text, primary_key=True)
+    subject_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    cohort_initiation_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+
+    definition_type_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[definition_type_concept_id])
+    subject_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[subject_concept_id])
 
 
-t_concept_ancestor = Table(
-    'concept_ancestor', Base.metadata,
-    Column('ancestor_concept_id', Integer, nullable=False),
-    Column('descendant_concept_id', Integer, nullable=False),
-    Column('min_levels_of_separation', Integer, nullable=False),
-    Column('max_levels_of_separation', Integer, nullable=False),
-    ForeignKeyConstraint(['ancestor_concept_id'], ['concept.concept_id'], name='fpk_concept_ancestor_ancestor_concept_id'),
-    ForeignKeyConstraint(['descendant_concept_id'], ['concept.concept_id'], name='fpk_concept_ancestor_descendant_concept_id')
-)
+class ConceptAncestor(Base):
+    __tablename__ = 'concept_ancestor'
+    __table_args__ = (
+        ForeignKeyConstraint(['ancestor_concept_id'], ['concept.concept_id'], name='fpk_concept_ancestor_ancestor_concept_id'),
+        ForeignKeyConstraint(['descendant_concept_id'], ['concept.concept_id'], name='fpk_concept_ancestor_descendant_concept_id'),
+        PrimaryKeyConstraint('ancestor_concept_id', 'descendant_concept_id', 'min_levels_of_separation', 'max_levels_of_separation', name='eh_composite_pk_concept_ancestor')
+    )
+
+    ancestor_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    descendant_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    min_levels_of_separation: Mapped[int] = mapped_column(Integer, primary_key=True)
+    max_levels_of_separation: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    ancestor_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[ancestor_concept_id])
+    descendant_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[descendant_concept_id])
 
 
-t_concept_synonym = Table(
-    'concept_synonym', Base.metadata,
-    Column('concept_id', Integer, nullable=False),
-    Column('concept_synonym_name', String(1000), nullable=False),
-    Column('language_concept_id', Integer, nullable=False),
-    ForeignKeyConstraint(['concept_id'], ['concept.concept_id'], name='fpk_concept_synonym_concept_id'),
-    ForeignKeyConstraint(['language_concept_id'], ['concept.concept_id'], name='fpk_concept_synonym_language_concept_id')
-)
+class ConceptSynonym(Base):
+    __tablename__ = 'concept_synonym'
+    __table_args__ = (
+        ForeignKeyConstraint(['concept_id'], ['concept.concept_id'], name='fpk_concept_synonym_concept_id'),
+        ForeignKeyConstraint(['language_concept_id'], ['concept.concept_id'], name='fpk_concept_synonym_language_concept_id'),
+        PrimaryKeyConstraint('concept_id', 'concept_synonym_name', 'language_concept_id', name='eh_composite_pk_concept_synonym')
+    )
+
+    concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    concept_synonym_name: Mapped[str] = mapped_column(String(1000), primary_key=True)
+    language_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[concept_id])
+    language_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[language_concept_id])
 
 
 class Cost(Base):
@@ -183,39 +206,55 @@ class Cost(Base):
     revenue_code_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[revenue_code_concept_id])
 
 
-t_drug_strength = Table(
-    'drug_strength', Base.metadata,
-    Column('drug_concept_id', Integer, nullable=False),
-    Column('ingredient_concept_id', Integer, nullable=False),
-    Column('amount_value', Numeric),
-    Column('amount_unit_concept_id', Integer),
-    Column('numerator_value', Numeric),
-    Column('numerator_unit_concept_id', Integer),
-    Column('denominator_value', Numeric),
-    Column('denominator_unit_concept_id', Integer),
-    Column('box_size', Integer),
-    Column('valid_start_date', Date, nullable=False),
-    Column('valid_end_date', Date, nullable=False),
-    Column('invalid_reason', String(1)),
-    ForeignKeyConstraint(['amount_unit_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_amount_unit_concept_id'),
-    ForeignKeyConstraint(['denominator_unit_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_denominator_unit_concept_id'),
-    ForeignKeyConstraint(['drug_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_drug_concept_id'),
-    ForeignKeyConstraint(['ingredient_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_ingredient_concept_id'),
-    ForeignKeyConstraint(['numerator_unit_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_numerator_unit_concept_id')
-)
+class DrugStrength(Base):
+    __tablename__ = 'drug_strength'
+    __table_args__ = (
+        ForeignKeyConstraint(['amount_unit_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_amount_unit_concept_id'),
+        ForeignKeyConstraint(['denominator_unit_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_denominator_unit_concept_id'),
+        ForeignKeyConstraint(['drug_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_drug_concept_id'),
+        ForeignKeyConstraint(['ingredient_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_ingredient_concept_id'),
+        ForeignKeyConstraint(['numerator_unit_concept_id'], ['concept.concept_id'], name='fpk_drug_strength_numerator_unit_concept_id'),
+        PrimaryKeyConstraint('drug_concept_id', 'ingredient_concept_id', 'amount_value', 'amount_unit_concept_id', 'numerator_value', 'numerator_unit_concept_id', 'denominator_value', 'denominator_unit_concept_id', 'box_size', 'valid_start_date', 'valid_end_date', 'invalid_reason', name='eh_composite_pk_drug_strength')
+    )
+
+    drug_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    ingredient_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    amount_value: Mapped[decimal.Decimal] = mapped_column(Numeric, primary_key=True)
+    amount_unit_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    numerator_value: Mapped[decimal.Decimal] = mapped_column(Numeric, primary_key=True)
+    numerator_unit_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    denominator_value: Mapped[decimal.Decimal] = mapped_column(Numeric, primary_key=True)
+    denominator_unit_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    box_size: Mapped[int] = mapped_column(Integer, primary_key=True)
+    valid_start_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+    valid_end_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+    invalid_reason: Mapped[str] = mapped_column(String(1), primary_key=True)
+
+    amount_unit_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[amount_unit_concept_id])
+    denominator_unit_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[denominator_unit_concept_id])
+    drug_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[drug_concept_id])
+    ingredient_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[ingredient_concept_id])
+    numerator_unit_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[numerator_unit_concept_id])
 
 
-t_fact_relationship = Table(
-    'fact_relationship', Base.metadata,
-    Column('domain_concept_id_1', Integer, nullable=False),
-    Column('fact_id_1', Integer, nullable=False),
-    Column('domain_concept_id_2', Integer, nullable=False),
-    Column('fact_id_2', Integer, nullable=False),
-    Column('relationship_concept_id', Integer, nullable=False),
-    ForeignKeyConstraint(['domain_concept_id_1'], ['concept.concept_id'], name='fpk_fact_relationship_domain_concept_id_1'),
-    ForeignKeyConstraint(['domain_concept_id_2'], ['concept.concept_id'], name='fpk_fact_relationship_domain_concept_id_2'),
-    ForeignKeyConstraint(['relationship_concept_id'], ['concept.concept_id'], name='fpk_fact_relationship_relationship_concept_id')
-)
+class FactRelationship(Base):
+    __tablename__ = 'fact_relationship'
+    __table_args__ = (
+        ForeignKeyConstraint(['domain_concept_id_1'], ['concept.concept_id'], name='fpk_fact_relationship_domain_concept_id_1'),
+        ForeignKeyConstraint(['domain_concept_id_2'], ['concept.concept_id'], name='fpk_fact_relationship_domain_concept_id_2'),
+        ForeignKeyConstraint(['relationship_concept_id'], ['concept.concept_id'], name='fpk_fact_relationship_relationship_concept_id'),
+        PrimaryKeyConstraint('domain_concept_id_1', 'fact_id_1', 'domain_concept_id_2', 'fact_id_2', 'relationship_concept_id', name='eh_composite_pk_fact_relationship')
+    )
+
+    domain_concept_id_1: Mapped[int] = mapped_column(Integer, primary_key=True)
+    fact_id_1: Mapped[int] = mapped_column(Integer, primary_key=True)
+    domain_concept_id_2: Mapped[int] = mapped_column(Integer, primary_key=True)
+    fact_id_2: Mapped[int] = mapped_column(Integer, primary_key=True)
+    relationship_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[domain_concept_id_1])
+    concept_: Mapped['Concept'] = relationship('Concept', foreign_keys=[domain_concept_id_2])
+    relationship_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[relationship_concept_id])
 
 
 class Location(Base):
@@ -311,21 +350,28 @@ class Relationship(Base):
     relationship_concept: Mapped['Concept'] = relationship('Concept')
 
 
-t_source_to_concept_map = Table(
-    'source_to_concept_map', Base.metadata,
-    Column('source_code', String(50), nullable=False),
-    Column('source_concept_id', Integer, nullable=False),
-    Column('source_vocabulary_id', String(20), nullable=False),
-    Column('source_code_description', String(255)),
-    Column('target_concept_id', Integer, nullable=False),
-    Column('target_vocabulary_id', String(20), nullable=False),
-    Column('valid_start_date', Date, nullable=False),
-    Column('valid_end_date', Date, nullable=False),
-    Column('invalid_reason', String(1)),
-    ForeignKeyConstraint(['source_concept_id'], ['concept.concept_id'], name='fpk_source_to_concept_map_source_concept_id'),
-    ForeignKeyConstraint(['target_concept_id'], ['concept.concept_id'], name='fpk_source_to_concept_map_target_concept_id'),
-    ForeignKeyConstraint(['target_vocabulary_id'], ['vocabulary.vocabulary_id'], name='fpk_source_to_concept_map_target_vocabulary_id')
-)
+class SourceToConceptMap(Base):
+    __tablename__ = 'source_to_concept_map'
+    __table_args__ = (
+        ForeignKeyConstraint(['source_concept_id'], ['concept.concept_id'], name='fpk_source_to_concept_map_source_concept_id'),
+        ForeignKeyConstraint(['target_concept_id'], ['concept.concept_id'], name='fpk_source_to_concept_map_target_concept_id'),
+        ForeignKeyConstraint(['target_vocabulary_id'], ['vocabulary.vocabulary_id'], name='fpk_source_to_concept_map_target_vocabulary_id'),
+        PrimaryKeyConstraint('source_code', 'source_concept_id', 'source_vocabulary_id', 'source_code_description', 'target_concept_id', 'target_vocabulary_id', 'valid_start_date', 'valid_end_date', 'invalid_reason', name='eh_composite_pk_source_to_concept_map')
+    )
+
+    source_code: Mapped[str] = mapped_column(String(50), primary_key=True)
+    source_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source_vocabulary_id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    source_code_description: Mapped[str] = mapped_column(String(255), primary_key=True)
+    target_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    target_vocabulary_id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    valid_start_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+    valid_end_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+    invalid_reason: Mapped[str] = mapped_column(String(1), primary_key=True)
+
+    source_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[source_concept_id])
+    target_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[target_concept_id])
+    target_vocabulary: Mapped['Vocabulary'] = relationship('Vocabulary')
 
 
 class CareSite(Base):
@@ -347,18 +393,25 @@ class CareSite(Base):
     place_of_service_concept: Mapped['Concept'] = relationship('Concept')
 
 
-t_concept_relationship = Table(
-    'concept_relationship', Base.metadata,
-    Column('concept_id_1', Integer, nullable=False),
-    Column('concept_id_2', Integer, nullable=False),
-    Column('relationship_id', String(20), nullable=False),
-    Column('valid_start_date', Date, nullable=False),
-    Column('valid_end_date', Date, nullable=False),
-    Column('invalid_reason', String(1)),
-    ForeignKeyConstraint(['concept_id_1'], ['concept.concept_id'], name='fpk_concept_relationship_concept_id_1'),
-    ForeignKeyConstraint(['concept_id_2'], ['concept.concept_id'], name='fpk_concept_relationship_concept_id_2'),
-    ForeignKeyConstraint(['relationship_id'], ['relationship.relationship_id'], name='fpk_concept_relationship_relationship_id')
-)
+class ConceptRelationship(Base):
+    __tablename__ = 'concept_relationship'
+    __table_args__ = (
+        ForeignKeyConstraint(['concept_id_1'], ['concept.concept_id'], name='fpk_concept_relationship_concept_id_1'),
+        ForeignKeyConstraint(['concept_id_2'], ['concept.concept_id'], name='fpk_concept_relationship_concept_id_2'),
+        ForeignKeyConstraint(['relationship_id'], ['relationship.relationship_id'], name='fpk_concept_relationship_relationship_id'),
+        PrimaryKeyConstraint('concept_id_1', 'concept_id_2', 'relationship_id', 'valid_start_date', 'valid_end_date', 'invalid_reason', name='eh_composite_pk_concept_relationship')
+    )
+
+    concept_id_1: Mapped[int] = mapped_column(Integer, primary_key=True)
+    concept_id_2: Mapped[int] = mapped_column(Integer, primary_key=True)
+    relationship_id: Mapped[str] = mapped_column(String(20), primary_key=True)
+    valid_start_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+    valid_end_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+    invalid_reason: Mapped[str] = mapped_column(String(1), primary_key=True)
+
+    concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[concept_id_1])
+    concept_: Mapped['Concept'] = relationship('Concept', foreign_keys=[concept_id_2])
+    relationship_: Mapped['Relationship'] = relationship('Relationship')
 
 
 class Provider(Base):
@@ -457,20 +510,28 @@ class ConditionEra(Base):
     person: Mapped['Person'] = relationship('Person')
 
 
-t_death = Table(
-    'death', Base.metadata,
-    Column('person_id', Integer, nullable=False),
-    Column('death_date', Date, nullable=False),
-    Column('death_datetime', DateTime),
-    Column('death_type_concept_id', Integer),
-    Column('cause_concept_id', Integer),
-    Column('cause_source_value', String(50)),
-    Column('cause_source_concept_id', Integer),
-    ForeignKeyConstraint(['cause_concept_id'], ['concept.concept_id'], name='fpk_death_cause_concept_id'),
-    ForeignKeyConstraint(['cause_source_concept_id'], ['concept.concept_id'], name='fpk_death_cause_source_concept_id'),
-    ForeignKeyConstraint(['death_type_concept_id'], ['concept.concept_id'], name='fpk_death_death_type_concept_id'),
-    ForeignKeyConstraint(['person_id'], ['person.person_id'], name='fpk_death_person_id')
-)
+class Death(Base):
+    __tablename__ = 'death'
+    __table_args__ = (
+        ForeignKeyConstraint(['cause_concept_id'], ['concept.concept_id'], name='fpk_death_cause_concept_id'),
+        ForeignKeyConstraint(['cause_source_concept_id'], ['concept.concept_id'], name='fpk_death_cause_source_concept_id'),
+        ForeignKeyConstraint(['death_type_concept_id'], ['concept.concept_id'], name='fpk_death_death_type_concept_id'),
+        ForeignKeyConstraint(['person_id'], ['person.person_id'], name='fpk_death_person_id'),
+        PrimaryKeyConstraint('person_id', 'death_date', 'death_datetime', 'death_type_concept_id', 'cause_concept_id', 'cause_source_value', 'cause_source_concept_id', name='eh_composite_pk_death')
+    )
+
+    person_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    death_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
+    death_datetime: Mapped[datetime.datetime] = mapped_column(DateTime, primary_key=True)
+    death_type_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    cause_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    cause_source_value: Mapped[str] = mapped_column(String(50), primary_key=True)
+    cause_source_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    cause_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[cause_concept_id])
+    cause_source_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[cause_source_concept_id])
+    death_type_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[death_type_concept_id])
+    person: Mapped['Person'] = relationship('Person')
 
 
 class DoseEra(Base):
@@ -689,14 +750,20 @@ class VisitOccurrence(Base):
     visit_type_concept: Mapped['Concept'] = relationship('Concept', foreign_keys=[visit_type_concept_id])
 
 
-t_episode_event = Table(
-    'episode_event', Base.metadata,
-    Column('episode_id', Integer, nullable=False),
-    Column('event_id', Integer, nullable=False),
-    Column('episode_event_field_concept_id', Integer, nullable=False),
-    ForeignKeyConstraint(['episode_event_field_concept_id'], ['concept.concept_id'], name='fpk_episode_event_episode_event_field_concept_id'),
-    ForeignKeyConstraint(['episode_id'], ['episode.episode_id'], name='fpk_episode_event_episode_id')
-)
+class EpisodeEvent(Base):
+    __tablename__ = 'episode_event'
+    __table_args__ = (
+        ForeignKeyConstraint(['episode_event_field_concept_id'], ['concept.concept_id'], name='fpk_episode_event_episode_event_field_concept_id'),
+        ForeignKeyConstraint(['episode_id'], ['episode.episode_id'], name='fpk_episode_event_episode_id'),
+        PrimaryKeyConstraint('episode_id', 'event_id', 'episode_event_field_concept_id', name='eh_composite_pk_episode_event')
+    )
+
+    episode_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    event_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    episode_event_field_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
+    episode_event_field_concept: Mapped['Concept'] = relationship('Concept')
+    episode: Mapped['Episode'] = relationship('Episode')
 
 
 class VisitDetail(Base):
