@@ -3,7 +3,10 @@
 import subprocess  # nosec: considered
 import sys
 
+import baselog
+
 from .config import Config
+from .rewrite import add_docstrings_to_file
 
 
 def main() -> int:
@@ -11,6 +14,10 @@ def main() -> int:
     entrypoint for direct execution; returns an integer suitable for use with sys.exit
     """
     config = Config(prog=__package__)
+    logger = baselog.BaseLog(
+        root_name=__package__,
+    )
+    config.logcfg(logger)
 
     command = [
         "/usr/local/bin/sqlacodegen",
@@ -31,10 +38,11 @@ def main() -> int:
         encoding="utf8",
         errors="strict",
     ) as output_file:
-        print(f"running command: {command!r}")
+        logger.info(f"running command: {command!r}")
         subprocess.check_call(command, stdout=output_file)
 
-    print(f"==> Wrote model to {config.output_file} <==")
+    logger.info("wrote model to: %s", config.output_file)
+    add_docstrings_to_file(config.output_file)
 
     return 0
 
