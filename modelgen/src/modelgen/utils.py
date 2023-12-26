@@ -56,11 +56,7 @@ def wrap_text(input_text: str, width: int = 75, margin: int = 4) -> str:
 
 def normalize_text(text: str) -> str:
     """try to simplify some text data"""
-    text = (
-        unicodedata.normalize("NFC", text)
-        .encode("iso-8859-15", "replace")
-        .decode("iso-8859-15")
-    )
+    text = unicodedata.normalize("NFC", text)
 
     # Replace various types of quotes with ASCII equivalent
     quotes = {
@@ -109,4 +105,6 @@ def normalize_text(text: str) -> str:
     text = "".join(
         ch for ch in text if unicodedata.category(ch)[0] != "C" or ch in ("\n", " ")
     )
+    text = text.encode("iso-8859-15", "replace").decode("iso-8859-15")
+
     return text

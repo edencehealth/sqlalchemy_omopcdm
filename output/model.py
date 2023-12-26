@@ -81,9 +81,9 @@ class Concept(OMOPCDMModelBase):
     Concept belongs to one domain, which defines the location where the Concept
     would be expected to occur within data tables of the CDM.
 
-    Concepts can represent broad categories (like ?Cardiovascular disease?),
-    detailed clinical elements (?Myocardial infarction of the anterolateral
-    wall?) or modifying characteristics and attributes that define Concepts at
+    Concepts can represent broad categories (like 'Cardiovascular disease'),
+    detailed clinical elements ('Myocardial infarction of the anterolateral
+    wall') or modifying characteristics and attributes that define Concepts at
     various levels of detail (severity of a disease, associated morphology,
     etc.).
 
@@ -163,7 +163,7 @@ class Domain(OMOPCDMModelBase):
     The DOMAIN table includes a list of OMOP-defined Domains the Concepts of
     the Standardized Vocabularies can belong to. A Domain defines the set of
     allowable Concepts for the standardized fields in the CDM tables. For
-    example, the ?Condition? Domain contains Concepts that describe a condition
+    example, the "Condition" Domain contains Concepts that describe a condition
     of a patient, and these Concepts can only be stored in the
     condition_concept_id field of the CONDITION_OCCURRENCE and CONDITION_ERA
     tables. This reference table is populated with a single record for each
@@ -885,7 +885,7 @@ class CareSite(OMOPCDMModelBase):
     a distinction between individual and institutional providers. The CARE_SITE
     table contains the institutional providers. If the source, instead of
     uniquely identifying individual Care Sites, only provides limited
-    information such as Place of Service, generic or ?pooled? Care Site records
+    information such as Place of Service, generic or "pooled" Care Site records
     are listed in the CARE_SITE table. There can be hierarchical and business
     relationships between Care Sites. For example, wards can belong to clinics
     or departments, which can in turn belong to hospitals, which in turn can
@@ -976,7 +976,7 @@ class Provider(OMOPCDMModelBase):
     Many sources do not make a distinction between individual and institutional
     providers. The PROVIDER table contains the individual providers. If the
     source, instead of uniquely identifying individual providers, only provides
-    limited information such as specialty, generic or ?pooled? Provider records
+    limited information such as specialty, generic or 'pooled' Provider records
     are listed in the PROVIDER table.
 
     https://ohdsi.github.io/CommonDataModel/cdm54.html#PROVIDER
@@ -1345,7 +1345,7 @@ class Episode(OMOPCDMModelBase):
 
     User Guide
 
-    Valid Episode Concepts belong to the ?Episode? domain. For cancer episodes
+    Valid Episode Concepts belong to the 'Episode' domain. For cancer episodes
     please see [article], for non-cancer episodes please see [article]. If your
     source data does not have all episodes that are relevant to the therapeutic
     area, write only those you can easily derive from the data. It is
@@ -1677,7 +1677,7 @@ class Specimen(OMOPCDMModelBase):
 class VisitOccurrence(OMOPCDMModelBase):
     """
     This table contains Events where Persons engage with the healthcare system
-    for a duration of time. They are often also called ?Encounters?. Visits are
+    for a duration of time. They are often also called "Encounters". Visits are
     defined by a configuration of circumstances under which they occur, such as
     (i) whether the patient comes to a healthcare institution, the other way
     around, or the interaction is remote, (ii) whether and what kind of trained
@@ -1690,7 +1690,7 @@ class VisitOccurrence(OMOPCDMModelBase):
     Domain, which form a hierarchical structure, but rolling up to generally
     familiar Visits adopted in most healthcare systems worldwide:
 
-    The Visit duration, or ?length of stay?, is defined as VISIT_END_DATE -
+    The Visit duration, or 'length of stay', is defined as VISIT_END_DATE -
     VISIT_START_DATE. For all Visits this is <1 day, except Inpatient Visits
     and Non-hospital institution Visits. The CDM also contains the VISIT_DETAIL
     table where additional information about the Visit is stored, for example,
@@ -2033,10 +2033,10 @@ class ConditionOccurrence(OMOPCDMModelBase):
     is not known and later not recorded, and (ii) the Persons typically cease
     interacting with the healthcare system when they feel better, which leads
     to incomplete capture of resolved Conditions. The CONDITION_ERA table
-    addresses this issue. Family history and past diagnoses (?history of?) are
+    addresses this issue. Family history and past diagnoses ('history of') are
     not recorded in this table. Instead, they are listed in the OBSERVATION
     table. Codes written in the process of establishing the diagnosis, such as
-    ?question of? of and ?rule out?, should not represented here. Instead, they
+    'question of' of and 'rule out', should not represented here. Instead, they
     should be recorded in the OBSERVATION table, if they are used for analyses.
     However, this information is not always available.
 
@@ -2134,7 +2134,7 @@ class ConditionOccurrence(OMOPCDMModelBase):
 
 class DeviceExposure(OMOPCDMModelBase):
     """
-    The Device domain captures information about a person?s exposure to a
+    The Device domain captures information about a person's exposure to a
     foreign physical object or instrument which is used for diagnostic or
     therapeutic purposes through a mechanism beyond chemical action. Devices
     include implantable objects (e.g. pacemakers, stents, artificial joints),
@@ -2377,7 +2377,7 @@ class Measurement(OMOPCDMModelBase):
     """
     The MEASUREMENT table contains records of Measurements, i.e. structured
     values (numerical or categorical) obtained through systematic and
-    standardized examination or testing of a Person or Person?s sample. The
+    standardized examination or testing of a Person or Person's sample. The
     MEASUREMENT table contains both orders and results of such Measurements as
     laboratory tests, vital signs, quantitative findings from pathology
     reports, etc. Measurements are stored as attribute value pairs, with the
@@ -2409,12 +2409,12 @@ class Measurement(OMOPCDMModelBase):
     the corresponding Measurement was carried out, which in itself is already
     useful information for some use cases. For some Measurement Concepts, the
     result is included in the test. For example, ICD10 CONCEPT_ID 45548980
-    ?Abnormal level of unspecified serum enzyme? indicates a Measurement and
+    'Abnormal level of unspecified serum enzyme' indicates a Measurement and
     the result (abnormal). In those situations, the CONCEPT_RELATIONSHIP table
-    in addition to the ?Maps to? record contains a second record with the
-    relationship_id set to ?Maps to value?. In this example, the ?Maps to?
-    relationship directs to 4046263 ?Enzyme measurement? as well as a ?Maps to
-    value? record to 4135493 ?Abnormal?.
+    in addition to the 'Maps to' record contains a second record with the
+    relationship_id set to 'Maps to value'. In this example, the 'Maps to'
+    relationship directs to 4046263 'Enzyme measurement' as well as a 'Maps to
+    value' record to 4135493 'Abnormal'.
 
     https://ohdsi.github.io/CommonDataModel/cdm54.html#MEASUREMENT
     """
@@ -2552,7 +2552,7 @@ class Note(OMOPCDMModelBase):
     properly annotate a document; Kind of Document and any one of the other 4
     dimensions. However, not all the permutations of the CDO dimensions will
     necessarily yield an existing LOINC code. Each of these dimensions are
-    contained in the OMOP Vocabulary under the domain of ?Meas Value? with each
+    contained in the OMOP Vocabulary under the domain of 'Meas Value' with each
     dimension represented as a Concept Class.
 
     https://ohdsi.github.io/CommonDataModel/cdm54.html#NOTE
@@ -2673,7 +2673,7 @@ class Observation(OMOPCDMModelBase):
     result, the clinical fact can be stated separately from the type of
     Observation in the VALUE_AS_* fields. It is recommended for Observations
     that are suggestive statements of positive assertion should have a value of
-    ?Yes? (concept_id=4188539), recorded, even though the null value is the
+    'Yes' (concept_id=4188539), recorded, even though the null value is the
     equivalent.
 
     https://ohdsi.github.io/CommonDataModel/cdm54.html#OBSERVATION
