@@ -49,11 +49,11 @@ main() {
   log "creating schema ${CDM_SCHEMA}"
   psql -c "CREATE SCHEMA IF NOT EXISTS ${CDM_SCHEMA};"
 
-    #"/ddl/OMOPCDM_postgresql_5.4_indices.sql" \
   for file in \
     "/ddl/OMOPCDM_postgresql_5.4_ddl.sql" \
     "/ddl/OMOPCDM_postgresql_5.4_primary_keys.sql" \
     "/ddl/OMOPCDM_postgresql_5.4_constraints.sql" \
+    "/ddl/OMOPCDM_postgresql_5.4_indices.sql" \
     "/ddl/eh_mods.sql" \
   ; do
     tmp_file="${temp_dir}/$(basename "$file")"
