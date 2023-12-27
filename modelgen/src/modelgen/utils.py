@@ -42,7 +42,6 @@ def wrap_text(input_text: str, width: int = 75, margin: int = 4) -> str:
     # Process each paragraph
     wrapped_text: List[str] = []
     for paragraph in paragraphs:
-        logger.debug("paragraph: %s", paragraph)
         if paragraph:
             # Wrap this paragraph, add a left margin, and then add it to the result.
             wrapped_paragraph = wrapper.fill(paragraph)

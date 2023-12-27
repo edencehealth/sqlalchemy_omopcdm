@@ -1,5 +1,4 @@
 """access the official OMOP CDM documentation"""
-
 import logging
 from typing import Dict
 
@@ -62,6 +61,8 @@ def get_omopcdm_descriptions(url: str) -> Dict[str, str]:
             normalize_text("\n\n".join(description_content))
         )
 
-    logger.debug("result: %s", result)
+    for k, v in result.items():
+        for line in v.splitlines():
+            logger.debug("%s: %s", k, line)
 
     return result

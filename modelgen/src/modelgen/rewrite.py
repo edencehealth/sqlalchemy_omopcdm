@@ -4,46 +4,45 @@
 import ast
 import logging
 
+from .config import Config
 from .rtfm import get_omopcdm_descriptions
 from .utils import camel_to_snake
 
 logger = logging.getLogger(__name__)
 
-BASE_DOC_URL = "https://ohdsi.github.io/CommonDataModel/cdm54.html"
 DOC_COMMENT_SPACER = "\n    "
-BASE_CLASS_NAME = "OMOPCDMModelBase"
-BASE_CLASS_DESC = "Base for OMOP Common Data Model v5.4 Models"
 
 
 class DocStringInserter(ast.NodeTransformer):
     """class for adding docstrings to class definitions"""
 
-    def __init__(self) -> None:
+    def __init__(self, config: Config) -> None:
         super().__init__()
-        self.doc_map = get_omopcdm_descriptions(BASE_DOC_URL)
+        self.config = config
+        self.doc_map = get_omopcdm_descriptions(config.base_doc_url)
 
     def visit_ClassDef(self, node) -> ast.ClassDef:
         """handler called when visiting a ClassDef node"""
-        print(f"Visiting class: {node.name}")
 
+        logger.debug("visiting class: %s", node.name)
         # rename the base class
         if node.name == "Base":
-            node.name = BASE_CLASS_NAME
+            node.name = self.config.base_class_name
 
-        if node.bases and node.name != BASE_CLASS_NAME:
-            # Change the name of the first base class
-            node.bases[0] = ast.Name(id=BASE_CLASS_NAME, ctx=ast.Load())
+        if node.bases and node.name != self.config.base_class_name:
+            # in the model classes change the name of the base class to BASE_CLASS_NAME
+            node.bases[0] = ast.Name(id=self.config.base_class_name, ctx=ast.Load())
 
         # Create a new docstring node
-        if node.name == BASE_CLASS_NAME:
+        if node.name == self.config.base_class_name:
             # ...for the base class
             new_docstring = ast.Expr(
                 value=ast.Constant(
                     value=(
                         f"{DOC_COMMENT_SPACER}"
-                        f"{BASE_CLASS_DESC}"
+                        f"{self.config.base_class_desc}"
                         f"{DOC_COMMENT_SPACER}"
-                        f"{BASE_DOC_URL}"
+                        f"{self.config.base_doc_url}"
                         f"{DOC_COMMENT_SPACER}"
                     )
                 )
@@ -58,7 +57,7 @@ class DocStringInserter(ast.NodeTransformer):
                     value=(
                         f"\n{table_description}"
                         f"{DOC_COMMENT_SPACER}"
-                        f"{BASE_DOC_URL}"
+                        f"{self.config.base_doc_url}"
                         f"#{link_fragment}"
                         f"{DOC_COMMENT_SPACER}"
                     ),
@@ -83,15 +82,17 @@ class DocStringInserter(ast.NodeTransformer):
         return node
 
 
-def add_docstrings_to_file(filename):
+def rename_base_and_add_docstrings(config: Config):
     """add docstrings to the Class definitions in the given model file"""
+    filename = config.output_file
+
     with open(filename, "rt", encoding="utf8", errors="strict") as fh:
         source = fh.read()
 
     # Parse the source code into an AST
     tree = ast.parse(source)
     # Modify the AST
-    tree = DocStringInserter().visit(tree)
+    tree = DocStringInserter(config).visit(tree)
     # Convert the AST back to source code
     modified_source = ast.unparse(tree)
 

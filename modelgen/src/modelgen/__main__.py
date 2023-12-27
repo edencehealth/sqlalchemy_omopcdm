@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-""" utility """
-import subprocess  # nosec: considered
+""" entrypoint for direct execution """
 import sys
+import time
 
 import baselog
 
 from .config import Config
-from .rewrite import add_docstrings_to_file
+from .rewrite import rename_base_and_add_docstrings
+from .shellout import black, isort, sqlacodegen
 
 
 def main() -> int:
@@ -19,30 +20,20 @@ def main() -> int:
     )
     config.logcfg(logger)
 
-    command = [
-        "/usr/local/bin/sqlacodegen",
-        f"postgresql://{config.db_user}:{config.db_password}@"
-        f"{config.db_host}/{config.db_name}",
-    ]
-
-    if config.options:
-        command.insert(1, "--options")
-        command.insert(2, config.options)
-    if config.generator:
-        command.insert(1, "--generator")
-        command.insert(2, config.generator)
-
-    with open(
-        config.output_file,
-        "wt",
-        encoding="utf8",
-        errors="strict",
-    ) as output_file:
-        logger.info(f"running command: {command!r}")
-        subprocess.check_call(command, stdout=output_file)
-
-    logger.info("wrote model to: %s", config.output_file)
-    add_docstrings_to_file(config.output_file)
+    for i, step in enumerate(
+        (
+            sqlacodegen,
+            rename_base_and_add_docstrings,
+            isort,
+            black,
+        )
+    ):
+        step_num = i + 1
+        logger.info("step %s; %s", step_num, step.__name__)
+        dur = time.time()
+        step(config)
+        dur = time.time() - dur
+        logger.debug("step %s; %s done in %ss", step_num, step.__name__, dur)
 
     return 0
 
