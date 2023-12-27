@@ -6,6 +6,7 @@ import time
 import baselog
 
 from .config import Config
+from .dbinit import initdb
 from .rewrite import rename_base_and_add_docstrings
 from .shellout import black, isort, sqlacodegen
 
@@ -17,11 +18,14 @@ def main() -> int:
     config = Config(prog=__package__)
     logger = baselog.BaseLog(
         root_name=__package__,
+        log_dir=config.log_dir,
+        console_log_level=config.log_level,
     )
     config.logcfg(logger)
 
     for i, step in enumerate(
         (
+            initdb,
             sqlacodegen,
             rename_base_and_add_docstrings,
             isort,

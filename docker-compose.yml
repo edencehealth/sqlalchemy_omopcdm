@@ -31,12 +31,8 @@ services:
       PGDATABASE: ${TARGET_DB_NAME}
       PGUSER: ${TARGET_DB_USER}
       PGPASSWORD: ${TARGET_DB_PASSWORD}
-      # this variable is consumed by init-omopcdm.sh
-      CDM_SCHEMA: public
     volumes:
       - "targetdb:/pgdata:rw"
-      - "./dbinit/ddl:/ddl:ro"
-      - "./dbinit/init-omopcdm.sh:/docker-entrypoint-initdb.d/init-omopcdm.sh:ro"
     healthcheck:
       interval: 10s
       retries: 10

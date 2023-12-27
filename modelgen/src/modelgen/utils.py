@@ -7,6 +7,8 @@ from typing import Final, List
 
 logger = logging.getLogger(__name__)
 
+semver_matcher = re.compile(r"^v?(?P<patch>(?P<minor>(?P<major>\d+)\.\d+)\.\d+)(.+)?$")
+
 
 def camel_to_snake(name: str) -> str:
     """return the snake_case version of the given CamelCase input string"""
