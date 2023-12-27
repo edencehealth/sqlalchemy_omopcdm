@@ -1,6 +1,6 @@
-# sa_omopcdm
+# `sqlalchemy_omopcdm`
 
-## how
+## About
 
 In this repo we setup a postgres database container with the official OMOP CDM v5.4 DDL and PK constraints, then we run [sqlacodegen](https://github.com/agronholm/sqlacodegen) on the database and make some limited tweaks (such as adding documentation, setting the base model name, and applying the formatting tools `isort` and `black`).
 
@@ -10,7 +10,7 @@ You can recreate the output file with the following command:
 
 This single command will bring up the database, load the DDL into it, build the modelgen container, and run it against the database. The result is written to the output dir.
 
-## usage
+## Generating
 
 When invoked with the `-h` / `--help` argument, the program emits this help documentation:
 

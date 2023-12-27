@@ -8,7 +8,7 @@ services:
       DB_USER: ${TARGET_DB_USER}
       DB_PASSWORD: ${TARGET_DB_PASSWORD}
       DB_NAME: ${TARGET_DB_NAME}
-      OUTPUT_FILE: "/output/model.py"
+      OUTPUT_FILE: "/output/omopcdm54.py"
       OPTIONS: "nobidi"
       GENERATOR: "declarative"
     depends_on:
@@ -16,7 +16,7 @@ services:
         condition: service_healthy
     restart: no
     volumes:
-      - "./output:/output:rw"
+      - "./src/sqlalchemy_omopcdm:/output:rw"
 
   # https://hub.docker.com/_/postgres
   cdmdb:

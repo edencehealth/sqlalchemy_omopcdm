@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sqlalchemy-omopcdm"
+requires-python = ">= 3.10"
+description = "OMOP CDM v5.4 SQLAlchemy Declarative Mapping Models"
+readme = "README.md"
+authors = [
+    { name = "edenceHealth NV", email = "info@edence.health" },
+    { name = "Ben Burke", email = "ben.burke@edence.health" },
+]
+license = { file = "LICENSE.txt" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+]
+keywords = [
+    'OHDSI',
+    'OMOP CDM',
+    'OMOP',
+    'CDM',
+    'SQLAlchemy',
+    'Models',
+    'Tables',
+]
+dependencies = ["sqlalchemy>=2.0.0"]
+dynamic = ["version"]
+
+[project.urls]
+# Documentation = "https://your_package_name.readthedocs.io/"
+Documentation = "https://github.com/edencehealth/sqlalchemy_omopcdm"
+Source = "https://github.com/edencehealth/sqlalchemy_omopcdm"
+Tracker = "https://github.com/edencehealth/sqlalchemy_omopcdm/issues"
+
+
+[tool.setuptools.package-data]
+"sqlalchemy_omopcdm" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+# All the following settings are optional:
+where = ["src"]                  # ["."] by default
+include = ["sqlalchemy_omopcdm"] # ["*"] by default
+# exclude = ["mypackage.tests*"]  # empty by default
+namespaces = false # true by default
