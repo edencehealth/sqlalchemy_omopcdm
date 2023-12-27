@@ -15,16 +15,27 @@ This single command will bring up the database, load the DDL into it, build the 
 When invoked with the `-h` / `--help` argument, the program emits this help documentation:
 
 ```
-usage: modelgen [-h] [--db-host DB_HOST] [--db-port DB_PORT]
+usage: modelgen [-h] [--log-dir LOG_DIR]
+                [--log-level {CRITICAL,ERROR,WARNING,INFO,DEBUG}]
+                [--db-dbms DB_DBMS] [--db-host DB_HOST] [--db-port DB_PORT]
                 [--db-name DB_NAME] [--db-password DB_PASSWORD]
                 [--db-user DB_USER] [--options OPTIONS]
                 [--generator GENERATOR] [--output-file OUTPUT_FILE]
-                [--base-doc-url BASE_DOC_URL]
+                [--base-doc-url BASE_DOC_URL] [--base-ddl-url BASE_DDL_URL]
                 [--base-class-name BASE_CLASS_NAME]
                 [--base-class-desc BASE_CLASS_DESC]
+                [--cdm-version CDM_VERSION] [--cdm-schema CDM_SCHEMA]
 
 options:
   -h, --help            show this help message and exit
+  --log-dir LOG_DIR     directory where run logs should be written (default:
+                        '/log')
+  --log-level {CRITICAL,ERROR,WARNING,INFO,DEBUG}
+                        the level of verbosity to use when writing to the
+                        console (default: 'INFO')
+  --db-dbms DB_DBMS     database management system operating on the db_host;
+                        this is used to construct the DDL URLs (default:
+                        'postgresql')
   --db-host DB_HOST     network hostname to use when connecting to db server
                         (default: 'localhost')
   --db-port DB_PORT     network port number to use when connecting to db
@@ -44,10 +55,20 @@ options:
                         and the page from which table descriptions are drawn
                         (default:
                         'https://ohdsi.github.io/CommonDataModel/cdm54.html')
+  --base-ddl-url BASE_DDL_URL
+                        URL template from which the official DDL files should
+                        be downloaded from (default: 'https://raw.githubuserco
+                        ntent.com/OHDSI/CommonDataModel/{cdm_version}/inst/ddl
+                        /{cdm_version_short}/{dialect}')
   --base-class-name BASE_CLASS_NAME
                         the name of the base class which the models are all
                         subclasses of (default: 'OMOPCDMModelBase')
   --base-class-desc BASE_CLASS_DESC
                         the description used for the base class (default:
                         'Base for OMOP Common Data Model v5.4 Models')
+  --cdm-version CDM_VERSION
+                        the OMOP CDM version to generate (default: 'v5.4.1')
+  --cdm-schema CDM_SCHEMA
+                        the name of the OMOP CDM schema within the database on
+                        the server (default: 'public')
 ```
