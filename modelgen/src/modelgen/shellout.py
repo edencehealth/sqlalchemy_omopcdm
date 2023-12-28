@@ -17,7 +17,7 @@ def run_cmd(
 ) -> Tuple[str, str]:
     """run the given command returning a stdout, stderr tuple"""
 
-    output = subprocess.run(
+    output = subprocess.run(  # nosec: considered; limited inputs
         command,
         check=True,
         stdout=stdout if stdout else subprocess.PIPE,

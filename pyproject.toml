@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "sqlalchemy-omopcdm"
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 description = "OMOP CDM v5.4 SQLAlchemy Declarative Mapping Models"
 readme = "README.md"
 authors = [

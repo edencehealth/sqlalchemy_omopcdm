@@ -1,4 +1,5 @@
 """declarative config"""
+# pylint: disable=too-few-public-methods
 from typing import Optional
 
 from basecfg import BaseCfg, opt

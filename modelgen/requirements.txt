@@ -4,6 +4,7 @@ beautifulsoup4~=4.12.2
 black~=23.12.1
 git+https://github.com/agronholm/sqlacodegen@master
 isort~=5.13.2
+libcst~=1.1.0
 psycopg2-binary~=2.9.9
 requests~=2.31.0
 sqlalchemy~=2.0.23

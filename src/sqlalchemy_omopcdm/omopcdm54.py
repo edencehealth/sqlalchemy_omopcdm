@@ -1,3 +1,8 @@
+"""OMOP Common Data Model v5.4 DeclarativeBase SQLAlchemy models"""
+# pylint: disable=too-few-public-methods
+# pylint: disable=too-many-lines
+# pylint: disable=unnecessary-pass
+# pylint: disable=unsubscriptable-object
 import datetime
 import decimal
 from typing import Optional
@@ -63,6 +68,7 @@ class Cohort(OMOPCDMModelBase):
             name="eh_composite_pk_cohort",
         ),
     )
+
     cohort_definition_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     subject_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     cohort_start_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
@@ -118,6 +124,7 @@ class Concept(OMOPCDMModelBase):
         Index("idx_concept_domain_id", "domain_id"),
         Index("idx_concept_vocabluary_id", "vocabulary_id"),
     )
+
     concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     concept_name: Mapped[str] = mapped_column(String(255))
     domain_id: Mapped[str] = mapped_column(String(20))
@@ -128,6 +135,7 @@ class Concept(OMOPCDMModelBase):
     valid_end_date: Mapped[datetime.date] = mapped_column(Date)
     standard_concept: Mapped[Optional[str]] = mapped_column(String(1))
     invalid_reason: Mapped[Optional[str]] = mapped_column(String(1))
+
     concept_class: Mapped["ConceptClass"] = relationship(
         "ConceptClass", foreign_keys=[concept_class_id]
     )
@@ -157,9 +165,11 @@ class ConceptClass(OMOPCDMModelBase):
         PrimaryKeyConstraint("concept_class_id", name="xpk_concept_class"),
         Index("idx_concept_class_class_id", "concept_class_id"),
     )
+
     concept_class_id: Mapped[str] = mapped_column(String(20), primary_key=True)
     concept_class_name: Mapped[str] = mapped_column(String(255))
     concept_class_concept_id: Mapped[int] = mapped_column(Integer)
+
     concept_class_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[concept_class_concept_id]
     )
@@ -189,9 +199,11 @@ class Domain(OMOPCDMModelBase):
         PrimaryKeyConstraint("domain_id", name="xpk_domain"),
         Index("idx_domain_domain_id", "domain_id"),
     )
+
     domain_id: Mapped[str] = mapped_column(String(20), primary_key=True)
     domain_name: Mapped[str] = mapped_column(String(255))
     domain_concept_id: Mapped[int] = mapped_column(Integer)
+
     domain_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[domain_concept_id]
     )
@@ -218,11 +230,13 @@ class Vocabulary(OMOPCDMModelBase):
         PrimaryKeyConstraint("vocabulary_id", name="xpk_vocabulary"),
         Index("idx_vocabulary_vocabulary_id", "vocabulary_id"),
     )
+
     vocabulary_id: Mapped[str] = mapped_column(String(20), primary_key=True)
     vocabulary_name: Mapped[str] = mapped_column(String(255))
     vocabulary_concept_id: Mapped[int] = mapped_column(Integer)
     vocabulary_reference: Mapped[Optional[str]] = mapped_column(String(255))
     vocabulary_version: Mapped[Optional[str]] = mapped_column(String(255))
+
     vocabulary_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[vocabulary_concept_id]
     )
@@ -254,6 +268,7 @@ class CdmSource(OMOPCDMModelBase):
             name="eh_composite_pk_cdm_source",
         ),
     )
+
     cdm_source_name: Mapped[str] = mapped_column(String(255), primary_key=True)
     cdm_source_abbreviation: Mapped[str] = mapped_column(String(25), primary_key=True)
     cdm_holder: Mapped[str] = mapped_column(String(255), primary_key=True)
@@ -265,6 +280,7 @@ class CdmSource(OMOPCDMModelBase):
     source_documentation_reference: Mapped[Optional[str]] = mapped_column(String(255))
     cdm_etl_reference: Mapped[Optional[str]] = mapped_column(String(255))
     cdm_version: Mapped[Optional[str]] = mapped_column(String(10))
+
     cdm_version_concept: Mapped["Concept"] = relationship("Concept")
 
 
@@ -302,6 +318,7 @@ class CohortDefinition(OMOPCDMModelBase):
             name="eh_composite_pk_cohort_definition",
         ),
     )
+
     cohort_definition_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     cohort_definition_name: Mapped[str] = mapped_column(String(255), primary_key=True)
     definition_type_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -309,6 +326,7 @@ class CohortDefinition(OMOPCDMModelBase):
     cohort_definition_description: Mapped[Optional[str]] = mapped_column(Text)
     cohort_definition_syntax: Mapped[Optional[str]] = mapped_column(Text)
     cohort_initiation_date: Mapped[Optional[datetime.date]] = mapped_column(Date)
+
     definition_type_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[definition_type_concept_id]
     )
@@ -358,10 +376,12 @@ class ConceptAncestor(OMOPCDMModelBase):
         Index("idx_concept_ancestor_id_1", "ancestor_concept_id"),
         Index("idx_concept_ancestor_id_2", "descendant_concept_id"),
     )
+
     ancestor_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     descendant_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     min_levels_of_separation: Mapped[int] = mapped_column(Integer, primary_key=True)
     max_levels_of_separation: Mapped[int] = mapped_column(Integer, primary_key=True)
+
     ancestor_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[ancestor_concept_id]
     )
@@ -398,9 +418,11 @@ class ConceptSynonym(OMOPCDMModelBase):
         ),
         Index("idx_concept_synonym_id", "concept_id"),
     )
+
     concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     concept_synonym_name: Mapped[str] = mapped_column(String(1000), primary_key=True)
     language_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
     concept: Mapped["Concept"] = relationship("Concept", foreign_keys=[concept_id])
     language_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[language_concept_id]
@@ -473,6 +495,7 @@ class Cost(OMOPCDMModelBase):
         PrimaryKeyConstraint("cost_id", name="xpk_cost"),
         Index("idx_cost_event_id", "cost_event_id"),
     )
+
     cost_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     cost_event_id: Mapped[int] = mapped_column(Integer)
     cost_domain_id: Mapped[str] = mapped_column(String(20))
@@ -495,6 +518,7 @@ class Cost(OMOPCDMModelBase):
     revenue_code_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     drg_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     drg_source_value: Mapped[Optional[str]] = mapped_column(String(3))
+
     cost_domain: Mapped["Domain"] = relationship("Domain")
     cost_type_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[cost_type_concept_id]
@@ -557,6 +581,7 @@ class DrugStrength(OMOPCDMModelBase):
         Index("idx_drug_strength_id_1", "drug_concept_id"),
         Index("idx_drug_strength_id_2", "ingredient_concept_id"),
     )
+
     drug_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     ingredient_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     valid_start_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
@@ -569,6 +594,7 @@ class DrugStrength(OMOPCDMModelBase):
     denominator_unit_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     box_size: Mapped[Optional[int]] = mapped_column(Integer)
     invalid_reason: Mapped[Optional[str]] = mapped_column(String(1))
+
     amount_unit_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[amount_unit_concept_id]
     )
@@ -639,11 +665,13 @@ class FactRelationship(OMOPCDMModelBase):
         Index("idx_fact_relationship_id2", "domain_concept_id_2"),
         Index("idx_fact_relationship_id3", "relationship_concept_id"),
     )
+
     domain_concept_id_1: Mapped[int] = mapped_column(Integer, primary_key=True)
     fact_id_1: Mapped[int] = mapped_column(Integer, primary_key=True)
     domain_concept_id_2: Mapped[int] = mapped_column(Integer, primary_key=True)
     fact_id_2: Mapped[int] = mapped_column(Integer, primary_key=True)
     relationship_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+
     concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[domain_concept_id_1]
     )
@@ -689,6 +717,7 @@ class Location(OMOPCDMModelBase):
         PrimaryKeyConstraint("location_id", name="xpk_location"),
         Index("idx_location_id_1", "location_id"),
     )
+
     location_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     address_1: Mapped[Optional[str]] = mapped_column(String(50))
     address_2: Mapped[Optional[str]] = mapped_column(String(50))
@@ -701,6 +730,7 @@ class Location(OMOPCDMModelBase):
     country_source_value: Mapped[Optional[str]] = mapped_column(String(80))
     latitude: Mapped[Optional[decimal.Decimal]] = mapped_column(Numeric)
     longitude: Mapped[Optional[decimal.Decimal]] = mapped_column(Numeric)
+
     country_concept: Mapped["Concept"] = relationship("Concept")
 
 
@@ -732,6 +762,7 @@ class Metadata(OMOPCDMModelBase):
         PrimaryKeyConstraint("metadata_id", name="xpk_metadata"),
         Index("idx_metadata_concept_id_1", "metadata_concept_id"),
     )
+
     metadata_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     metadata_concept_id: Mapped[int] = mapped_column(Integer)
     metadata_type_concept_id: Mapped[int] = mapped_column(Integer)
@@ -741,6 +772,7 @@ class Metadata(OMOPCDMModelBase):
     value_as_number: Mapped[Optional[decimal.Decimal]] = mapped_column(Numeric)
     metadata_date: Mapped[Optional[datetime.date]] = mapped_column(Date)
     metadata_datetime: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
+
     metadata_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[metadata_concept_id]
     )
@@ -781,6 +813,7 @@ class NoteNlp(OMOPCDMModelBase):
         Index("idx_note_nlp_concept_id_1", "note_nlp_concept_id"),
         Index("idx_note_nlp_note_id_1", "note_id"),
     )
+
     note_nlp_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     note_id: Mapped[int] = mapped_column(Integer)
     lexical_variant: Mapped[str] = mapped_column(String(250))
@@ -795,6 +828,7 @@ class NoteNlp(OMOPCDMModelBase):
     term_exists: Mapped[Optional[str]] = mapped_column(String(1))
     term_temporal: Mapped[Optional[str]] = mapped_column(String(50))
     term_modifiers: Mapped[Optional[str]] = mapped_column(String(2000))
+
     note_nlp_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[note_nlp_concept_id]
     )
@@ -825,12 +859,14 @@ class Relationship(OMOPCDMModelBase):
         PrimaryKeyConstraint("relationship_id", name="xpk_relationship"),
         Index("idx_relationship_rel_id", "relationship_id"),
     )
+
     relationship_id: Mapped[str] = mapped_column(String(20), primary_key=True)
     relationship_name: Mapped[str] = mapped_column(String(255))
     is_hierarchical: Mapped[str] = mapped_column(String(1))
     defines_ancestry: Mapped[str] = mapped_column(String(1))
     reverse_relationship_id: Mapped[str] = mapped_column(String(20))
     relationship_concept_id: Mapped[int] = mapped_column(Integer)
+
     relationship_concept: Mapped["Concept"] = relationship("Concept")
 
 
@@ -880,6 +916,7 @@ class SourceToConceptMap(OMOPCDMModelBase):
         Index("idx_source_to_concept_map_3", "target_concept_id"),
         Index("idx_source_to_concept_map_c", "source_code"),
     )
+
     source_code: Mapped[str] = mapped_column(String(50), primary_key=True)
     source_concept_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     source_vocabulary_id: Mapped[str] = mapped_column(String(20), primary_key=True)
@@ -889,6 +926,7 @@ class SourceToConceptMap(OMOPCDMModelBase):
     valid_end_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
     source_code_description: Mapped[Optional[str]] = mapped_column(String(255))
     invalid_reason: Mapped[Optional[str]] = mapped_column(String(1))
+
     source_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[source_concept_id]
     )
@@ -936,12 +974,14 @@ class CareSite(OMOPCDMModelBase):
         PrimaryKeyConstraint("care_site_id", name="xpk_care_site"),
         Index("idx_care_site_id_1", "care_site_id"),
     )
+
     care_site_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     care_site_name: Mapped[Optional[str]] = mapped_column(String(255))
     place_of_service_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     location_id: Mapped[Optional[int]] = mapped_column(Integer)
     care_site_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     place_of_service_source_value: Mapped[Optional[str]] = mapped_column(String(50))
+
     location: Mapped["Location"] = relationship("Location")
     place_of_service_concept: Mapped["Concept"] = relationship("Concept")
 
@@ -985,12 +1025,14 @@ class ConceptRelationship(OMOPCDMModelBase):
         Index("idx_concept_relationship_id_2", "concept_id_2"),
         Index("idx_concept_relationship_id_3", "relationship_id"),
     )
+
     concept_id_1: Mapped[int] = mapped_column(Integer, primary_key=True)
     concept_id_2: Mapped[int] = mapped_column(Integer, primary_key=True)
     relationship_id: Mapped[str] = mapped_column(String(20), primary_key=True)
     valid_start_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
     valid_end_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
     invalid_reason: Mapped[Optional[str]] = mapped_column(String(1))
+
     concept: Mapped["Concept"] = relationship("Concept", foreign_keys=[concept_id_1])
     concept_: Mapped["Concept"] = relationship("Concept", foreign_keys=[concept_id_2])
     relationship_: Mapped["Relationship"] = relationship("Relationship")
@@ -1043,6 +1085,7 @@ class Provider(OMOPCDMModelBase):
         PrimaryKeyConstraint("provider_id", name="xpk_provider"),
         Index("idx_provider_id_1", "provider_id"),
     )
+
     provider_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     provider_name: Mapped[Optional[str]] = mapped_column(String(255))
     npi: Mapped[Optional[str]] = mapped_column(String(20))
@@ -1056,6 +1099,7 @@ class Provider(OMOPCDMModelBase):
     specialty_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     gender_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     gender_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     care_site: Mapped["CareSite"] = relationship("CareSite")
     gender_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[gender_concept_id]
@@ -1139,6 +1183,7 @@ class Person(OMOPCDMModelBase):
         Index("idx_gender", "gender_concept_id"),
         Index("idx_person_id", "person_id"),
     )
+
     person_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     gender_concept_id: Mapped[int] = mapped_column(Integer)
     year_of_birth: Mapped[int] = mapped_column(Integer)
@@ -1157,6 +1202,7 @@ class Person(OMOPCDMModelBase):
     race_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     ethnicity_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     ethnicity_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     care_site: Mapped["CareSite"] = relationship("CareSite")
     ethnicity_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[ethnicity_concept_id]
@@ -1219,12 +1265,14 @@ class ConditionEra(OMOPCDMModelBase):
         Index("idx_condition_era_concept_id_1", "condition_concept_id"),
         Index("idx_condition_era_person_id_1", "person_id"),
     )
+
     condition_era_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     condition_concept_id: Mapped[int] = mapped_column(Integer)
     condition_era_start_date: Mapped[datetime.date] = mapped_column(Date)
     condition_era_end_date: Mapped[datetime.date] = mapped_column(Date)
     condition_occurrence_count: Mapped[Optional[int]] = mapped_column(Integer)
+
     condition_concept: Mapped["Concept"] = relationship("Concept")
     person: Mapped["Person"] = relationship("Person")
 
@@ -1262,6 +1310,7 @@ class Death(OMOPCDMModelBase):
         PrimaryKeyConstraint("person_id", "death_date", name="eh_composite_pk_death"),
         Index("idx_death_person_id_1", "person_id"),
     )
+
     person_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     death_date: Mapped[datetime.date] = mapped_column(Date, primary_key=True)
     death_datetime: Mapped[Optional[datetime.datetime]] = mapped_column(DateTime)
@@ -1269,6 +1318,7 @@ class Death(OMOPCDMModelBase):
     cause_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     cause_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     cause_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     cause_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[cause_concept_id]
     )
@@ -1317,6 +1367,7 @@ class DoseEra(OMOPCDMModelBase):
         Index("idx_dose_era_concept_id_1", "drug_concept_id"),
         Index("idx_dose_era_person_id_1", "person_id"),
     )
+
     dose_era_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     drug_concept_id: Mapped[int] = mapped_column(Integer)
@@ -1324,6 +1375,7 @@ class DoseEra(OMOPCDMModelBase):
     dose_value: Mapped[decimal.Decimal] = mapped_column(Numeric)
     dose_era_start_date: Mapped[datetime.date] = mapped_column(Date)
     dose_era_end_date: Mapped[datetime.date] = mapped_column(Date)
+
     drug_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[drug_concept_id]
     )
@@ -1362,6 +1414,7 @@ class DrugEra(OMOPCDMModelBase):
         Index("idx_drug_era_concept_id_1", "drug_concept_id"),
         Index("idx_drug_era_person_id_1", "person_id"),
     )
+
     drug_era_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     drug_concept_id: Mapped[int] = mapped_column(Integer)
@@ -1369,6 +1422,7 @@ class DrugEra(OMOPCDMModelBase):
     drug_era_end_date: Mapped[datetime.date] = mapped_column(Date)
     drug_exposure_count: Mapped[Optional[int]] = mapped_column(Integer)
     gap_days: Mapped[Optional[int]] = mapped_column(Integer)
+
     drug_concept: Mapped["Concept"] = relationship("Concept")
     person: Mapped["Person"] = relationship("Person")
 
@@ -1422,6 +1476,7 @@ class Episode(OMOPCDMModelBase):
         ),
         PrimaryKeyConstraint("episode_id", name="xpk_episode"),
     )
+
     episode_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     episode_concept_id: Mapped[int] = mapped_column(Integer)
@@ -1437,6 +1492,7 @@ class Episode(OMOPCDMModelBase):
     episode_number: Mapped[Optional[int]] = mapped_column(Integer)
     episode_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     episode_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     episode_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[episode_concept_id]
     )
@@ -1512,11 +1568,13 @@ class ObservationPeriod(OMOPCDMModelBase):
         PrimaryKeyConstraint("observation_period_id", name="xpk_observation_period"),
         Index("idx_observation_period_id_1", "person_id"),
     )
+
     observation_period_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     observation_period_start_date: Mapped[datetime.date] = mapped_column(Date)
     observation_period_end_date: Mapped[datetime.date] = mapped_column(Date)
     period_type_concept_id: Mapped[int] = mapped_column(Integer)
+
     period_type_concept: Mapped["Concept"] = relationship("Concept")
     person: Mapped["Person"] = relationship("Person")
 
@@ -1594,6 +1652,7 @@ class PayerPlanPeriod(OMOPCDMModelBase):
         PrimaryKeyConstraint("payer_plan_period_id", name="xpk_payer_plan_period"),
         Index("idx_period_person_id_1", "person_id"),
     )
+
     payer_plan_period_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     payer_plan_period_start_date: Mapped[datetime.date] = mapped_column(Date)
@@ -1611,6 +1670,7 @@ class PayerPlanPeriod(OMOPCDMModelBase):
     stop_reason_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     stop_reason_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     stop_reason_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     payer_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[payer_concept_id]
     )
@@ -1686,6 +1746,7 @@ class Specimen(OMOPCDMModelBase):
         Index("idx_specimen_concept_id_1", "specimen_concept_id"),
         Index("idx_specimen_person_id_1", "person_id"),
     )
+
     specimen_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     specimen_concept_id: Mapped[int] = mapped_column(Integer)
@@ -1701,6 +1762,7 @@ class Specimen(OMOPCDMModelBase):
     unit_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     anatomic_site_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     disease_status_source_value: Mapped[Optional[str]] = mapped_column(String(50))
+
     anatomic_site_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[anatomic_site_concept_id]
     )
@@ -1817,6 +1879,7 @@ class VisitOccurrence(OMOPCDMModelBase):
         Index("idx_visit_concept_id_1", "visit_concept_id"),
         Index("idx_visit_person_id_1", "person_id"),
     )
+
     visit_occurrence_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     visit_concept_id: Mapped[int] = mapped_column(Integer)
@@ -1834,6 +1897,7 @@ class VisitOccurrence(OMOPCDMModelBase):
     discharged_to_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     discharged_to_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     preceding_visit_occurrence_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     admitted_from_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[admitted_from_concept_id]
     )
@@ -1894,11 +1958,13 @@ class EpisodeEvent(OMOPCDMModelBase):
             name="eh_composite_pk_episode_event",
         ),
     )
+
     episode_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     event_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     episode_event_field_concept_id: Mapped[int] = mapped_column(
         Integer, primary_key=True
     )
+
     episode_event_field_concept: Mapped["Concept"] = relationship("Concept")
     episode: Mapped["Episode"] = relationship("Episode")
 
@@ -2004,6 +2070,7 @@ class VisitDetail(OMOPCDMModelBase):
         Index("idx_visit_det_occ_id", "visit_occurrence_id"),
         Index("idx_visit_det_person_id_1", "person_id"),
     )
+
     visit_detail_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     visit_detail_concept_id: Mapped[int] = mapped_column(Integer)
@@ -2027,6 +2094,7 @@ class VisitDetail(OMOPCDMModelBase):
     discharged_to_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     preceding_visit_detail_id: Mapped[Optional[int]] = mapped_column(Integer)
     parent_visit_detail_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     admitted_from_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[admitted_from_concept_id]
     )
@@ -2147,6 +2215,7 @@ class ConditionOccurrence(OMOPCDMModelBase):
         Index("idx_condition_person_id_1", "person_id"),
         Index("idx_condition_visit_id_1", "visit_occurrence_id"),
     )
+
     condition_occurrence_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     condition_concept_id: Mapped[int] = mapped_column(Integer)
@@ -2167,6 +2236,7 @@ class ConditionOccurrence(OMOPCDMModelBase):
     condition_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     condition_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     condition_status_source_value: Mapped[Optional[str]] = mapped_column(String(50))
+
     condition_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[condition_concept_id]
     )
@@ -2260,6 +2330,7 @@ class DeviceExposure(OMOPCDMModelBase):
         Index("idx_device_person_id_1", "person_id"),
         Index("idx_device_visit_id_1", "visit_occurrence_id"),
     )
+
     device_exposure_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     device_concept_id: Mapped[int] = mapped_column(Integer)
@@ -2283,6 +2354,7 @@ class DeviceExposure(OMOPCDMModelBase):
     unit_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     unit_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     unit_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     device_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[device_concept_id]
     )
@@ -2387,6 +2459,7 @@ class DrugExposure(OMOPCDMModelBase):
         Index("idx_drug_person_id_1", "person_id"),
         Index("idx_drug_visit_id_1", "visit_occurrence_id"),
     )
+
     drug_exposure_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     drug_concept_id: Mapped[int] = mapped_column(Integer)
@@ -2414,6 +2487,7 @@ class DrugExposure(OMOPCDMModelBase):
     drug_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     route_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     dose_unit_source_value: Mapped[Optional[str]] = mapped_column(String(50))
+
     drug_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[drug_concept_id]
     )
@@ -2543,6 +2617,7 @@ class Measurement(OMOPCDMModelBase):
         Index("idx_measurement_person_id_1", "person_id"),
         Index("idx_measurement_visit_id_1", "visit_occurrence_id"),
     )
+
     measurement_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     measurement_concept_id: Mapped[int] = mapped_column(Integer)
@@ -2566,6 +2641,7 @@ class Measurement(OMOPCDMModelBase):
     value_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     measurement_event_id: Mapped[Optional[int]] = mapped_column(Integer)
     meas_event_field_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     meas_event_field_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[meas_event_field_concept_id]
     )
@@ -2668,6 +2744,7 @@ class Note(OMOPCDMModelBase):
         Index("idx_note_person_id_1", "person_id"),
         Index("idx_note_visit_id_1", "visit_occurrence_id"),
     )
+
     note_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     note_date: Mapped[datetime.date] = mapped_column(Date)
@@ -2684,6 +2761,7 @@ class Note(OMOPCDMModelBase):
     note_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     note_event_id: Mapped[Optional[int]] = mapped_column(Integer)
     note_event_field_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     encoding_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[encoding_concept_id]
     )
@@ -2804,6 +2882,7 @@ class Observation(OMOPCDMModelBase):
         Index("idx_observation_person_id_1", "person_id"),
         Index("idx_observation_visit_id_1", "visit_occurrence_id"),
     )
+
     observation_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     observation_concept_id: Mapped[int] = mapped_column(Integer)
@@ -2825,6 +2904,7 @@ class Observation(OMOPCDMModelBase):
     value_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     observation_event_id: Mapped[Optional[int]] = mapped_column(Integer)
     obs_event_field_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
+
     obs_event_field_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[obs_event_field_concept_id]
     )
@@ -2931,6 +3011,7 @@ class ProcedureOccurrence(OMOPCDMModelBase):
         Index("idx_procedure_person_id_1", "person_id"),
         Index("idx_procedure_visit_id_1", "visit_occurrence_id"),
     )
+
     procedure_occurrence_id: Mapped[int] = mapped_column(Integer, primary_key=True)
     person_id: Mapped[int] = mapped_column(Integer)
     procedure_concept_id: Mapped[int] = mapped_column(Integer)
@@ -2949,6 +3030,7 @@ class ProcedureOccurrence(OMOPCDMModelBase):
     procedure_source_value: Mapped[Optional[str]] = mapped_column(String(50))
     procedure_source_concept_id: Mapped[Optional[int]] = mapped_column(Integer)
     modifier_source_value: Mapped[Optional[str]] = mapped_column(String(50))
+
     modifier_concept: Mapped["Concept"] = relationship(
         "Concept", foreign_keys=[modifier_concept_id]
     )

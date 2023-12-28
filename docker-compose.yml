@@ -48,6 +48,5 @@ services:
     restart: unless-stopped
     shm_size: 2gb
 
-
 volumes:
   targetdb:

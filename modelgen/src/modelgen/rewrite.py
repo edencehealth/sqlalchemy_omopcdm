@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """ utility for adjusting the generated model's doc comments, base class name,  """
 # pylint: disable=invalid-name
-import ast
 import logging
+from typing import Sequence
+
+import libcst as cst
 
 from .config import Config
 from .rtfm import get_omopcdm_descriptions
@@ -13,7 +15,7 @@ logger = logging.getLogger(__name__)
 DOC_COMMENT_SPACER = "\n    "
 
 
-class DocStringInserter(ast.NodeTransformer):
+class ModelRewriter(cst.CSTTransformer):
     """class for adding docstrings to class definitions"""
 
     def __init__(self, config: Config) -> None:
@@ -21,65 +23,87 @@ class DocStringInserter(ast.NodeTransformer):
         self.config = config
         self.doc_map = get_omopcdm_descriptions(config.base_doc_url)
 
-    def visit_ClassDef(self, node) -> ast.ClassDef:
-        """handler called when visiting a ClassDef node"""
+    def leave_Module(
+        self,
+        original_node: cst.Module,
+        updated_node: cst.Module,
+    ) -> cst.Module:
+        """add a module doc string and some comments"""
+        # module docstring
+        mod_docstring = "OMOP Common Data Model v5.4 DeclarativeBase SQLAlchemy models"
+        docstring = cst.SimpleStatementLine(
+            body=[cst.Expr(cst.SimpleString(f'"""{mod_docstring}"""'))]
+        )
 
-        logger.debug("visiting class: %s", node.name)
-        # rename the base class
-        if node.name == "Base":
-            node.name = self.config.base_class_name
+        # pylint-disable comments
+        disabled: Sequence[str] = (
+            "too-few-public-methods",
+            "too-many-lines",
+            "unnecessary-pass",
+            "unsubscriptable-object",
+        )
+        pylint_comments = [
+            cst.EmptyLine(comment=cst.Comment(f"# pylint: disable={check}"))
+            for check in disabled
+        ]
+        # Insert the docstring and comments at the beginning of the module body
+        new_body = [docstring] + pylint_comments + list(updated_node.body)
 
-        if node.bases and node.name != self.config.base_class_name:
-            # in the model classes change the name of the base class to BASE_CLASS_NAME
-            node.bases[0] = ast.Name(id=self.config.base_class_name, ctx=ast.Load())
+        return updated_node.with_changes(body=new_body)
+
+    def leave_ClassDef(
+        self,
+        original_node: cst.ClassDef,
+        updated_node: cst.ClassDef,
+    ) -> cst.ClassDef:
+        """Handler called when leaving a ClassDef node."""
+        class_name = updated_node.name.value
+
+        # Rename the base class, if necessary
+        if class_name == "Base":
+            updated_node = updated_node.with_changes(
+                name=cst.Name(self.config.base_class_name)
+            )
+            class_name = updated_node.name.value
+
+        # Update the base class for model classes
+        if updated_node.bases and class_name != self.config.base_class_name:
+            updated_node = updated_node.with_changes(
+                bases=[cst.Arg(value=cst.Name(value=self.config.base_class_name))]
+            )
 
         # Create a new docstring node
-        if node.name == self.config.base_class_name:
-            # ...for the base class
-            new_docstring = ast.Expr(
-                value=ast.Constant(
-                    value=(
-                        f"{DOC_COMMENT_SPACER}"
-                        f"{self.config.base_class_desc}"
-                        f"{DOC_COMMENT_SPACER}"
-                        f"{self.config.base_doc_url}"
-                        f"{DOC_COMMENT_SPACER}"
-                    )
-                )
+        if class_name == self.config.base_class_name:
+            docstring_value = (
+                f"{DOC_COMMENT_SPACER}"
+                f"{self.config.base_class_desc}"
+                f"{DOC_COMMENT_SPACER}"
+                f"{self.config.base_doc_url}"
+                f"{DOC_COMMENT_SPACER}"
             )
         else:
-            # ...for the model classes
-            snake_case_name = camel_to_snake(node.name)
+            snake_case_name = camel_to_snake(class_name)
             link_fragment = snake_case_name.upper()
-            table_description = self.doc_map[snake_case_name]
-            new_docstring = ast.Expr(
-                value=ast.Constant(
-                    value=(
-                        f"\n{table_description}"
-                        f"{DOC_COMMENT_SPACER}"
-                        f"{self.config.base_doc_url}"
-                        f"#{link_fragment}"
-                        f"{DOC_COMMENT_SPACER}"
-                    ),
-                    type=None,
-                )
+            table_description = self.doc_map.get(snake_case_name, "")
+            docstring_value = (
+                f"\n{table_description}"
+                f"{DOC_COMMENT_SPACER}"
+                f"{self.config.base_doc_url}"
+                f"#{link_fragment}"
+                f"{DOC_COMMENT_SPACER}"
             )
 
-        # replace or insert the docstring node
-        if docstring := ast.get_docstring(node):
-            # replace existing docstring
-            if docstring != node.body[0].value.value.strip():
-                raise ValueError(
-                    "Node has docstring but it isn't at body[0]; "
-                    f"{docstring!r} vs {node.body[0].value.value.strip()!r}"
-                )
-            node.body[0] = new_docstring
-        else:
-            # Insert the docstring at the start of the function body
-            node.body.insert(0, new_docstring)
+        new_docstring = cst.SimpleStatementLine(
+            body=[cst.Expr(value=cst.SimpleString(f'"""{docstring_value}"""'))]
+        )
 
-        # Don't forget to return the modified node!
-        return node
+        # Insert the docstring at the start of the class body, if it's an IndentedBlock
+        if isinstance(updated_node.body, cst.IndentedBlock):
+            new_body = [new_docstring] + list(updated_node.body.body)
+            return updated_node.with_changes(body=cst.IndentedBlock(body=new_body))
+        # If it's not an IndentedBlock, this might not be the correct place to handle it
+        # You might want to log an error or handle this case differently
+        return updated_node
 
 
 def rename_base_and_add_docstrings(config: Config):
@@ -89,13 +113,11 @@ def rename_base_and_add_docstrings(config: Config):
     with open(filename, "rt", encoding="utf8", errors="strict") as fh:
         source = fh.read()
 
-    # Parse the source code into an AST
-    tree = ast.parse(source)
-    # Modify the AST
-    tree = DocStringInserter(config).visit(tree)
-    # Convert the AST back to source code
-    modified_source = ast.unparse(tree)
+    # parse the source code into a CST
+    rewriter = ModelRewriter(config)
+    # modify the CST
+    modified_tree = cst.parse_module(source).visit(rewriter)
 
     # Write the modified source code back to the file
     with open(filename, "wt", encoding="utf8", errors="strict") as fh:
-        fh.write(modified_source)
+        fh.write(modified_tree.code)

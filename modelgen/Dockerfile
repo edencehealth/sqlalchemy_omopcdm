@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.11-slim
 
 ARG AG="apt-get -yq --no-install-recommends"
 RUN set -eux; \

@@ -30,4 +30,3 @@ ALTER TABLE @cdmDatabaseSchema.fact_relationship
 
 ALTER TABLE @cdmDatabaseSchema.source_to_concept_map
   ADD CONSTRAINT "eh_composite_pk_source_to_concept_map" PRIMARY KEY (source_code, source_concept_id, source_vocabulary_id, target_concept_id, target_vocabulary_id, valid_start_date, valid_end_date);
-

@@ -9,3 +9,4 @@ pycodestyle~=2.11.1
 pylint~=3.0.3
 pytest~=7.4.3
 setuptools~=69.0.3
+types-requests~=2.31.0.10

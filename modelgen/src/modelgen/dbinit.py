@@ -1,5 +1,5 @@
 """ code for initializing the database from the reference DDL """
-
+# pylint: disable=too-many-instance-attributes
 import importlib
 import logging
 from typing import Dict, Literal, Sequence, TypeAlias
