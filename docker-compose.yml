@@ -1,8 +1,6 @@
 services:
-  # custom container for running this python package:
-  # https://github.com/agronholm/sqlacodegen
   modelgen:
-    build: modelgen
+    image: ghcr.io/edencehealth/sqlalchemy-omopcdm-modelgen:1
     environment:
       DB_HOST: cdmdb
       DB_USER: ${TARGET_DB_USER}
