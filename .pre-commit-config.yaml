@@ -72,8 +72,8 @@ repos:
     rev: v1.8.0
     hooks:
       - id: mypy
-        additional_dependencies:
-         - types-requests
+        #additional_dependencies:
+        # - types-requests
   # - repo: https://github.com/jendrikseipp/vulture
   #   rev: v2.7
   #   hooks:

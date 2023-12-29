@@ -1,74 +1,36 @@
-# `sqlalchemy_omopcdm`
+# sqlalchemy-omopcdm
 
 ## About
 
-In this repo we setup a postgres database container with the official OMOP CDM v5.4 DDL and PK constraints, then we run [sqlacodegen](https://github.com/agronholm/sqlacodegen) on the database and make some limited tweaks (such as adding documentation, setting the base model name, and applying the formatting tools `isort` and `black`).
+This package contains [Declarative Mapping](https://docs.sqlalchemy.org/en/20/orm/mapping_styles.html#orm-declarative-mapping)-based SQLAlchemy 2 models for each table in the OMOP CDM, including primary keys, indexes, and constraints. These models can be used to work with OMOP CDM databases - including the ability to initialize and query them.
+
+The models in this repo are automatically created using the [sqlacodegen](https://pypi.org/project/sqlacodegen/)-based [sqlalchemy_omopcdm_modelgen](https://github.com/edencehealth/sqlalchemy_omopcdm_modelgen) container image.
+
+**Important Note**: In order to use Declarative Mapping, [each table needs at least one column with primary key behavior](https://docs.sqlalchemy.org/en/20/faq/ormconfiguration.html#how-do-i-map-a-table-that-has-no-primary-key), to achieve this we have added 11 [unofficial & unsupported **composite** primary keys](https://github.com/edencehealth/sqlalchemy_omopcdm_modelgen/blob/main/src/modelgen/sql/eh_mods.sql) on the following tables: `cdm_source`, `cohort_definition`, `cohort`, `concept_ancestor`, `concept_relationship`, `concept_synonym`, `death`, `drug_strength`, `episode_event`, `fact_relationship`, `source_to_concept_map`
+
+## Naming
+
+Python naming can be complicated [^1][^2]. To make it clear for this repo, the distribution name is `sqlalchemy-omopcdm` (with a dash) and the package name is `sqlalchemy_omopcdm` (with an underscore).
+
+When you install the package, use:
+
+```sh
+pip install sqlalchemy-omopcdm
+```
+
+When you access the package in code, use:
+
+```python
+from sqlalchemy_omopcdm import CareSite
+```
+
+## Model Generation
 
 You can recreate the output file with the following command:
 
-`docker compose run --rm --build modelgen`
+`docker compose run --rm modelgen`
 
 This single command will bring up the database, load the DDL into it, build the modelgen container, and run it against the database. The result is written to the output dir.
 
-## Generating
-
-When invoked with the `-h` / `--help` argument, the program emits this help documentation:
-
-```
-usage: modelgen [-h] [--log-dir LOG_DIR]
-                [--log-level {CRITICAL,ERROR,WARNING,INFO,DEBUG}]
-                [--db-dbms DB_DBMS] [--db-host DB_HOST] [--db-port DB_PORT]
-                [--db-name DB_NAME] [--db-password DB_PASSWORD]
-                [--db-user DB_USER] [--options OPTIONS]
-                [--generator GENERATOR] [--output-file OUTPUT_FILE]
-                [--base-doc-url BASE_DOC_URL] [--base-ddl-url BASE_DDL_URL]
-                [--base-class-name BASE_CLASS_NAME]
-                [--base-class-desc BASE_CLASS_DESC]
-                [--cdm-version CDM_VERSION] [--cdm-schema CDM_SCHEMA]
-
-options:
-  -h, --help            show this help message and exit
-  --log-dir LOG_DIR     directory where run logs should be written (default:
-                        '/log')
-  --log-level {CRITICAL,ERROR,WARNING,INFO,DEBUG}
-                        the level of verbosity to use when writing to the
-                        console (default: 'INFO')
-  --db-dbms DB_DBMS     database management system operating on the db_host;
-                        this is used to construct the DDL URLs (default:
-                        'postgresql')
-  --db-host DB_HOST     network hostname to use when connecting to db server
-                        (default: 'localhost')
-  --db-port DB_PORT     network port number to use when connecting to db
-                        server (default: 5432)
-  --db-name DB_NAME     (default: 'postgres')
-  --db-password DB_PASSWORD
-                        (default: 'postgres')
-  --db-user DB_USER     (default: 'postgres')
-  --options OPTIONS     options to pass to sqlacodegen (default: None)
-  --generator GENERATOR
-                        which sqlacodegen generator to use (default: None)
-  --output-file OUTPUT_FILE
-                        full path at which the output file should be written
-                        (default: 'model.py')
-  --base-doc-url BASE_DOC_URL
-                        URL for both the OMOP CDM Table documentation links
-                        and the page from which table descriptions are drawn
-                        (default:
-                        'https://ohdsi.github.io/CommonDataModel/cdm54.html')
-  --base-ddl-url BASE_DDL_URL
-                        URL template from which the official DDL files should
-                        be downloaded from (default: 'https://raw.githubuserco
-                        ntent.com/OHDSI/CommonDataModel/{cdm_version}/inst/ddl
-                        /{cdm_version_short}/{dialect}')
-  --base-class-name BASE_CLASS_NAME
-                        the name of the base class which the models are all
-                        subclasses of (default: 'OMOPCDMModelBase')
-  --base-class-desc BASE_CLASS_DESC
-                        the description used for the base class (default:
-                        'Base for OMOP Common Data Model v5.4 Models')
-  --cdm-version CDM_VERSION
-                        the OMOP CDM version to generate (default: 'v5.4.1')
-  --cdm-schema CDM_SCHEMA
-                        the name of the OMOP CDM schema within the database on
-                        the server (default: 'public')
-```
+[^1]: [Python Packaging User Guide: Package name normalization](https://packaging.python.org/en/latest/specifications/name-normalization/)
+[^2]: [stackoverflow: Using hyphen/dash in python repository name and package name](https://stackoverflow.com/a/54599368)

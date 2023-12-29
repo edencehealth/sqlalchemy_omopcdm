@@ -40,7 +40,7 @@ jobs:
           set -eux
           python3 -m venv venv
           source venv/bin/activate
-          pip install --upgrade -r requirements-dev.txt
+          pip install --upgrade -r requirements.txt -r requirements.dev.txt
 
       - name: Build package
         run: |
