@@ -1,6 +1,6 @@
 services:
   modelgen:
-    image: ghcr.io/edencehealth/sqlalchemy-omopcdm-modelgen:1
+    image: edence/sqlalchemy-omopcdm-modelgen:1
     environment:
       DB_HOST: cdmdb
       DB_USER: ${TARGET_DB_USER}

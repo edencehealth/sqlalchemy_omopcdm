@@ -1,5 +1,16 @@
 # sqlalchemy-omopcdm
 
+Repo   | URL
+-----: | ----------------------------------------------------
+PyPI   | <https://pypi.org/project/sqlalchemy-omopcdm/>
+GitHub | <https://github.com/edencehealth/sqlalchemy_omopcdm>
+
+Install via:
+
+```sh
+pip install sqlalchemy-omopcdm
+```
+
 ## About
 
 This package contains [Declarative Mapping](https://docs.sqlalchemy.org/en/20/orm/mapping_styles.html#orm-declarative-mapping)-based SQLAlchemy 2 models for each table in the OMOP CDM, including primary keys, indexes, and constraints. These models can be used to work with OMOP CDM databases - including the ability to initialize and query them.
