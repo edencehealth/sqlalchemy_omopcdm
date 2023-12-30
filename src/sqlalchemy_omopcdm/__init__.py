@@ -1,7 +1,7 @@
 """ OMOP CDM v5.4 SQLAlchemy Declarative Mapping Models """
 from .omopcdm54 import (
     CareSite,
-    CdmSource,
+    CDMSource,
     Cohort,
     CohortDefinition,
     Concept,
@@ -44,7 +44,7 @@ from .omopcdm54 import (
 
 __all__ = (
     "CareSite",
-    "CdmSource",
+    "CDMSource",
     "Cohort",
     "CohortDefinition",
     "Concept",
