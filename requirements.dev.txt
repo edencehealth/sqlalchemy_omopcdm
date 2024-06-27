@@ -9,4 +9,4 @@ pycodestyle~=2.11.1
 pylint~=3.0.3
 pytest~=7.4.3
 setuptools~=69.0.3
-twine~=4.0.2
+twine~=5.1.1
