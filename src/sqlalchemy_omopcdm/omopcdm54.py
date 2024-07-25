@@ -1,4 +1,5 @@
 """OMOP Common Data Model v5.4 DeclarativeBase SQLAlchemy models"""
+
 # pylint: disable=too-few-public-methods
 # pylint: disable=too-many-lines
 # pylint: disable=unnecessary-pass
