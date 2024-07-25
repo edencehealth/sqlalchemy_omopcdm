@@ -1,4 +1,5 @@
 """ OMOP CDM v5.4 SQLAlchemy Declarative Mapping Models """
+
 from .omopcdm54 import (
     CareSite,
     CDMSource,
